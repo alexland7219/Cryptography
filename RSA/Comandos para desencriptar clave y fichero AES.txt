@@ -1,0 +1,13 @@
+Decrypt RSA files with private key
+
+openssl rsautl -decrypt -in oscar.ramos.nunez_RSA_RW.enc -out oscar_decRSA.txt -inkey oscar.ramos.nunez_SK.pem
+
+
+
+openssl rsautl -decrypt -in alexandre.ros.roger_RSA_RW.enc -out alex_decRSA.txt -inkey alexandre.ros.roger_SK.pem
+
+
+Decypt AES files
+openssl enc -d -aes-128-cbc -pbkdf2 -kfile oscar_decRSA.txt -in oscar.ramos.nunez_AES_RW.enc -out oscar.dec
+
+openssl enc -d -aes-128-cbc -pbkdf2 -kfile alex_decRSA.txt -in alexandre.ros.roger_AES_RW.enc -out alex.dec
