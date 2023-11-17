@@ -104,18 +104,18 @@ class rsa_public_key:
         return "\n*** PUBLIC KEY ***\n" + f"e = {self.publicExponent}\n" + f"N = {self.modulus}\n"
 
 class transaction:
+    """Class that represents one transaction in the blockchain"""
 
     def __init__(self, message, RSAkey):
-        #genera una transaccion firmando "message" con la clave "RSAkey"
-    
-        self.public_key
-        self.message
-        self.signature
+        """Generates the transaction with a message using key RSAkey"""
+
+        self.message = message
+        self.public_key = rsa_public_key(RSAkey)    
+        self.signature = RSAkey.sign(message)
 
     def verify(self):
-        #Salida: el booleano True si "signature" se corresponde con la firma de "message" hecha con la clave RSA asociada a la clave pública RSA; 
-        #   el booleano False en cualquier otro caso.
-        a=a
+        """Verifies message is valid with signature"""
+        return self.public_key.verify(self.message, self.signature)
 
 
 class block:
