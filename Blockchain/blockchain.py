@@ -98,7 +98,7 @@ class rsa_public_key:
     def verify(self, message, signature):
         """Verifies the message with the signature"""
         
-        return (signature == pow(message, self.publicExponent, self.modulus))
+        return (message == pow(signature, self.publicExponent, self.modulus))
 
     def __str__(self):
         """String representation of the public key"""
@@ -120,36 +120,30 @@ class transaction:
 
 
 class block:
-
-    # Un bloque es válido si la transacción es válida y su hash h satisface la condición h < 2^256−d siendo d un
-    # parámetro que indica el proof of work necesario par generar un bloque válido. Para esta práctica d=16.
-    
-    # Para calcular el hash h de un bloque haremos lo siguiente:
-    # entrada=str(previous_block_hash)
-    # entrada=entrada+str(transaction.public_key.publicExponent)
-    # entrada=entrada+str(transaction.public_key.modulus)
-    # entrada=entrada+str(transaction.message)
-    # entrada=entrada+str(transaction.signature)
-    # entrada=entrada+str(seed)
-    # h=int(hashlib.sha256(entrada.encode()).hexdigest(),16)
+    """Class that represents a block in the blockchain"""
     
     def generador_de_hash(self):
-        
-        entrada = str(self.previous_block_hash)
-        entrada += str(self.transaction.public_key.publicExponent)
-        entrada += str(self.transaction.public_key.modulus)
-        entrada += str(self.transaction.message)
-        entrada += str(self.transaction.signature)
-        entrada += str(self.seed)
-        h = int(hashlib.sha256(entrada.encode()).hexdigest(),16)
-        
-        return h
-        
-        
+        """Generates the hash of this block"""
 
+        self.block_hash = 2**240 + 1
+
+        while (self.block_hash >= 2**240): # Proof of work: 16 zeroes
+
+            self.seed += 1 # Change the seed (proof-of-work)
+
+            entrada  = str(self.previous_block_hash)
+            entrada += str(self.transaction.public_key.publicExponent)
+            entrada += str(self.transaction.public_key.modulus)
+            entrada += str(self.transaction.message)
+            entrada += str(self.transaction.signature)
+            entrada += str(self.seed)
+        
+            self.block_hash = int(hashlib.sha256(entrada.encode()).hexdigest(),16)
+
+        return self.block_hash
 
     def __init__(self):
-        #crea un bloque (no necesariamente v ́alido)
+        """Creates a block (non valid)"""
 
         self.block_hash = 0
         self.previous_block_hash = 0
@@ -157,63 +151,54 @@ class block:
         self.seed = 0
 
     def genesis(self,transaction):
-        # genera el primer bloque de una cadena con la transacción "transaction"
-        # que se caracteriza por:
-        # - previous_block_hash=0
-        # - ser válido
-        self.block_hash = self.generador_de_hash()
-        self.previous_block_hash = 0 # en ser el primer bloque
+        """Generates the first block of a chain with the given transaction"""
+
+        self.previous_block_hash = 0
         self.transaction = transaction
-        self.seed = 0 # ??
-        
+        self.block_hash = self.generador_de_hash()
 
     def next_block(self, transaction):
-        #genera un bloque v ́alido seguiente al actual con la transacci ́on "transaction"
+        """Generates the next block (valid) with the given transaction"""
         
         nextb = block()
-        nextb.block_hash = self.generador_de_hash()
         nextb.previous_block_hash = self.block_hash
         nextb.transaction = transaction
-        nextb.seed = 0 # ??
+        nextb.generador_de_hash()
+
+        return nextb
 
     def verify_block(self):
-        #Verifica si un bloque es válido:
-        #-Comprueba que el hash del bloque anterior cumple las condiciones exigidas
-        #-Comprueba que la transacción del bloque es válida
-        #-Comprueba que el hash del bloque cumple las condiciones exigidas
-        #Salida: el booleano True si todas las comprobaciones son correctas;
-        #el booleano False en cualquier otro caso.
+        """Verifies that this block is valid"""
         
-        # 1. hash anterior
-        h_ant = self.previous_block_hash
-        if h_ant >= 2**(256-16): # 2**256-d
+        if self.previous_block_hash >= 2**240:
             return False
         
-        # 2. Transacción válida
         if not(self.transaction.verify()):
             return False
         
-        # 3. Hash del bloque actual
-        h_act = self.block_hash
-        if h_act >= 2**(256-16):
+        if self.block_hash >= 2**(240):
             return False
         
         return True
 
 
 class block_chain:
+    """Class that represents a blockchain"""
+
     def __init__(self,transaction):
-        #genera una cadena de bloques que es una lista de bloques, el primer bloque es un bloque "genesis" generado amb la transacció "transaction"
+        """Generates a blockchain (list of blocks), with the first block (genesis) containing the given transaction"""
     
         self.list_of_blocks = [block()]
-        self.list_of_blocks[0] = block().genesis(transaction)
+        self.list_of_blocks[0].genesis(transaction)
 
     def add_block(self,transaction):
-        #añade a la cadena un nuevo bloque válido generado con la transacción "transaction"
+        """Operation to add a block with the given transaction"""
+
         ultimob = self.list_of_blocks[-1]
         self.list_of_blocks.append(ultimob.next_block(transaction))
 
     def verify(self):
+        """Verifies that the entire chain is valid"""
         #verifica si la cadena de bloques es válida:
         #- Comprueba que todos los bloques son válidos
         #- Comprueba que el primer bloque es un bloque "genesis"
@@ -221,8 +206,19 @@ class block_chain:
         #Salida: el booleano True si todas las comprobaciones son correctas;
         #en cualquier otro caso, el booleano False y un entero
         #correspondiente al último bloque válido
-        
-        for blo in self.list_of_blocks:
-            if not(blo.verify_block()):
-                return False
-        return True
+        for i in range(len(self.list_of_blocks)):
+            if i == 0:
+                # Genesis block
+                if self.list_of_blocks[i].previous_block_hash != 0:
+                    return (False, i-1)
+
+                # Next blocks
+                if not self.list_of_blocks[i].verify_block():
+                    return (False, i-1)
+
+                # If there is a next block
+                if i != len(self.list_of_blocks) - 1:
+                    if self.list_of_blocks[i].block_hash != self.list_of_blocks[i+1].previous_block_hash:
+                        return (False, i)
+        else:
+            return True
