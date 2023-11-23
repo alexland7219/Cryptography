@@ -122,6 +122,17 @@ class transaction:
 class block:
     """Class that represents a block in the blockchain"""
     
+    def getHash(self):
+        entrada  = str(self.previous_block_hash)
+        entrada += str(self.transaction.public_key.publicExponent)
+        entrada += str(self.transaction.public_key.modulus)
+        entrada += str(self.transaction.message)
+        entrada += str(self.transaction.signature)
+        entrada += str(self.seed)
+
+        return int(hashlib.sha256(entrada.encode()).hexdigest(),16)
+
+
     def generador_de_hash(self):
         """Generates the hash of this block"""
 
@@ -130,15 +141,7 @@ class block:
         while (self.block_hash >= 2**240): # Proof of work: 16 zeroes
 
             self.seed += 1 # Change the seed (proof-of-work)
-
-            entrada  = str(self.previous_block_hash)
-            entrada += str(self.transaction.public_key.publicExponent)
-            entrada += str(self.transaction.public_key.modulus)
-            entrada += str(self.transaction.message)
-            entrada += str(self.transaction.signature)
-            entrada += str(self.seed)
-        
-            self.block_hash = int(hashlib.sha256(entrada.encode()).hexdigest(),16)
+            self.block_hash = self.getHash();
 
         return self.block_hash
 
@@ -179,6 +182,9 @@ class block:
         if self.block_hash >= 2**(240):
             return False
         
+        if self.block_hash != self.getHash():
+            return False
+
         return True
 
 
