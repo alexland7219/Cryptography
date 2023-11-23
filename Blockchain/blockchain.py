@@ -210,20 +210,20 @@ class block_chain:
             if i == 0:
                 # Genesis block
                 if self.list_of_blocks[i].previous_block_hash != 0:
-                    print("First block is not genesis")
+                    print("[KO] First block is not genesis")
                     return (False, i-1)
 
             # Next blocks
             if not self.list_of_blocks[i].verify_block():
-                print("Block " + str(i) + " is not vaild")
+                print("[KO] Block " + str(i) + " is not vaild")
                 return (False, i-1)
 
             # If there is a next block
             if i != len(self.list_of_blocks) - 1:
                 if self.list_of_blocks[i].block_hash != self.list_of_blocks[i+1].previous_block_hash:
-                    print("Block " + str(i+1) + " does not match last block")
+                    print("[KO] Block " + str(i+1) + " does not match last block")
                     return (False, i)
 
         else:
-            print("Correct blockchain")
+            print("[OK] Correct blockchain")
             return True
