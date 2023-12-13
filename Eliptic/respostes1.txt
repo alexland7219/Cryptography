@@ -10,6 +10,8 @@ Hemos consultado la publicación del NIST y, en este caso, se usa una curva con:
 
 - n = 115792089210356248762697446949407573529996955224135760342422259061068512044369 = ffffffff 00000000 ffffffff ffffffff bce6faad a7179e84 f3b9cac2 fc632551
 
-El orden es n y además es primo. 
+El orden es n y además es primo. La signatura es válida.
 
 Se puede comprovar con el script.py que hemos adjuntado.
+
+Se entrega también una captura Wireshark que contiene todos los mensajes TCP enviados entre cliente y wikipedia.org (185.15.58.224).
