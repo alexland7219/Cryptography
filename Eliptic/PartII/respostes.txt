@@ -67,4 +67,4 @@ La dirección es http://GEANT.ocsp.sectigo.com.
 Con el comando $(openssl ocsp -issuer GEANTOVRSACA4.pem -cert www-fib-upc-es.pem -text -url http://GEANT.ocsp.sectigo.com) (en el script),
 dónde GEANTOVRSACA4.pem es el certificado de la red GÉANT y www-fib-upc-es.pem de la FIB, hemos visto que:
 
-- El certificado tiene status válido (Cert Status: good) y será válido hasta la semana que viene, 2023-12-20 18:34:36 GMT. 
+El certificado tiene status válido (Cert Status: good) y será válido hasta la semana que viene, 2023-12-20 18:34:36 GMT. 
