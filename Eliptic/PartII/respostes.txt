@@ -3,7 +3,7 @@
 Las fechas son
 
 Not Before:  2023-03-14 01:00:00 CET
-Not After :  2023-03-14 01:00:00 CET
+Not After :  2024-03-14 00:59:59 CET
 
 El exponente es 65537 (0x10001) y el módulo es: 
 
@@ -36,3 +36,35 @@ En decimal es:
 318115750922555584769639254837994316871502659521941029235075453497312888953021303
 
 El módulo tiene 1233 dígitos.
+
+2. 
+
+Del certificado, con el script hemos extraído el enlace a la CPS (https://sectigo.com/CPS).
+
+Del PDF Sectigo_WebPKI_CP_v1_3_3.pdf (Política de Certifiación), páginas 47 y 48, nos informan sobre las claves y tamaños requeridos:
+
+"[...] Los certificados emitidos bajo esta deben contener claves públicas RSA o de curva elíptica."
+
+Además se especifican las longitudes dependiendo de la fecha de expiración:
+
+"Todos los Certificados que caduquen el 31 de diciembre de 2030 o antes DEBERÁN contener Claves Públicas sujetas
+de al menos 2048 bits para RSA/DSA, de al menos 256 bits para curva elíptica, y estar firmadas con la
+clave privada correspondiente.
+
+Todos los Certificados que expiren después del 31 de diciembre de 2030 DEBERÁN contener Claves Públicas de al menos
+de al menos 3072 bits para RSA/DSA [...]"
+
+3. 
+
+Del certificado hemos extraído el Distribution Point CRL (http://GEANT.crl.sectigo.com/GEANTOVRSACA4.crl) 
+
+Se observan 18.226 certificados revocados. 
+
+4.
+
+La dirección es http://GEANT.ocsp.sectigo.com.
+
+Con el comando $(openssl ocsp -issuer GEANTOVRSACA4.pem -cert www-fib-upc-es.pem -text -url http://GEANT.ocsp.sectigo.com) (en el script),
+dónde GEANTOVRSACA4.pem es el certificado de la red GÉANT y www-fib-upc-es.pem de la FIB, hemos visto que:
+
+- El certificado tiene status válido (Cert Status: good) y será válido hasta la semana que viene, 2023-12-20 18:34:36 GMT. 
