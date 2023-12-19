@@ -1,0 +1,7 @@
+# To read info from cert x509 PEM
+
+openssl x509 -in cert.pem -noout -text
+
+# To read modulus
+
+openssl x509 -in cert.pem -noout -text -modulus
