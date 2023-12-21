@@ -1,0 +1,19 @@
+1- Usar decrypter, canviant la linia 111 depenent de estudiant
+
+2- Copiar en l'arxiu genPrivatKey.py la p i la q que el decrypter printeja per pantalla
+
+3- Executar els mateixos comandos que per RSA Raw:
+
+Decrypt RSA files with private key
+
+openssl rsautl -decrypt -in oscar.ramos.nunez_RSA_pseudo.enc -out oscar_decRSA.txt -inkey oscar.ramos.nunez_SK.pem
+
+
+
+openssl rsautl -decrypt -in alexandre.ros.roger_RSA_pseudo.enc -out alex_decRSA.txt -inkey alexandre.ros.roger_SK.pem
+
+
+Decypt AES files
+openssl enc -d -aes-128-cbc -pbkdf2 -kfile oscar_decRSA.txt -in oscar.ramos.nunez_AES_pseudo.enc -out oscar.dec
+
+openssl enc -d -aes-128-cbc -pbkdf2 -kfile alex_decRSA.txt -in alexandre.ros.roger_AES_pseudo.enc -out alex.dec
