@@ -4,21 +4,28 @@ import hashlib
 from Crypto.Signature import pss
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
+from itertools import product
+
+alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
 # Rebut
 rebut = r"CfrgHu+p7E"
 
-# Codi de control
-ccode = r"""XskHleQPb27l5j2B38J1FR/02H4c7uOCRghOyzohgc/4OcMS5
-B1Ju0NKrqsD/ERjY6gqY1W4rfVUHkTWbrl7Qk7bxgmX1GWPVnmOIxtssJYKM3
-xYJot/Z55TUlTvjK4eJexasFdc9kxXFLRg4AgKwUoisAzP5/YCNNNDtkgezvq
-TUPBlhiQd+/L/XeRA7UDSa3zwv9Z59eJAFX5H/4Os8SAPVqbWYYHvDDPl7OT7
-ZGVjG1O3W41Hcg6QC2Ztko934VxmktwNUJwdvppdyjXNk8nNRv6g2x5XCDIBz
-QIeugFAXngXGh4HhS7dR85rt4ZSmKt+9f0DcUDgKind8Yy5Bw==#D7zO/4Lyc
-63IHHpsg/P1PanMQX5KId0O#40289dc5869377b20188bea120e34006#4028
-9dc4869376800188be0caab75ad0#1687337327495 
+# Codi de control 
+# IGNORE ANY ASTERISKS (*) IN THE BEGINNING
+ccode = r"""iZtBXT2jxLDuQZpTeO3qJx9EtQvhfgsIz
++O9TZ6W3KvV610pTmZib+8vLdamTP7GCwKj8/0vqfG9SfWHmU4
+T62gYbS2FuWC/iqeIWhTMkpixpYK099PE4PZibSlz5gdb9YJDr
+PphXdaMccpESCs1zyffIfj/oUgdD0zWl57T0JqnlkLATmiwwHn
+vX88Kzs86f15TT4iX5how0KVQ5d0sUD2PgvOfuZZ3WcMndGiuy
+f9WCtlKc4nvhtqO8tGOknt1fzaHt6i4Id9qibq6M6TBbkmzcO9
+3EabJnOV7si69oT41zTjKZ+vJ9yTQW/eVWd6NMUZ3DhPJ5OHO4
+LWQQ==#bSttEmCpd6zkBMwHyL3GOTS83W780eeA#40289dc589
+1ac260018a88410e3108ce#40289dc5891ac260018a88410d3
+308c7#1694612893722 
 """.replace("\n", "").replace(" ", "").replace("\r", "")
 
+ENTROPY = 5
 
 # Clau publica servidor
 e = 65537
@@ -26,31 +33,32 @@ N = 0xa1fee0ba40faf8ab1352af26407fa61706bd91dc5c01e6606c29101ae15efa986c66ea8045
 
 server_pk = RSA.construct((N, e))
 
+i = 0
 
-# Validacio del rebut
 ccode_pieces = ccode.split("#")
 ballotId     = base64.b64decode(ccode_pieces[1].encode("ascii"))
-rebutSencer  = base64.b64encode(hashlib.sha256(ballotId).digest())
 
-if rebutSencer.startswith(rebut.encode("ascii")):
-    print("[OK] REBUT")
-else:
-    print("[KO] REBUT")
-
-# Validació firma
 dobleHash = base64.b64encode(hashlib.sha256(hashlib.sha256(ballotId).digest()).digest()).decode("ascii")
 
 msg  = (dobleHash + ";" + ccode_pieces[2] + ";" + ccode_pieces[3] + ";" + ccode_pieces[4]).encode("ascii")
 
-sgn = base64.b64decode(ccode_pieces[0].encode("ascii"))
-
-## VERIFICATION RSA-PSS
 h = SHA256.new(msg)
 verifier = pss.new(server_pk)
 
-try:
-    verifier.verify(h, sgn)
-    print("[OK] SIGNATURE AUTHENTIC")
-except (ValueError):
-    print("[KO] NON-AUTHENTIC SIGNATURE")
+for combination in product(alphabet, repeat=ENTROPY):
+    str_comb = "".join(combination)
+    
+    # Validació firma
 
+    sgn = base64.b64decode((str_comb + ccode_pieces[0]).encode("ascii"))
+
+    ## VERIFICATION RSA-PSS
+    try:
+        verifier.verify(h, sgn)
+        print("[CRACKED]")
+        print(combination)
+        exit()
+    except (ValueError):
+        print("Trying combinaiton " + str(i) + " out of " + str(64**ENTROPY) + "...")
+        i += 1
+        continue
