@@ -48,17 +48,21 @@ int main(int, char **)
 
 	std::vector<std::thread> threads;
 
+	#pragma omp parallel
+	#pragma omp single
 	for (char a : base64Chars)
 		for (char b : base64Chars)
 			for (char c : base64Chars)
 				for (char d : base64Chars)
-					#pragma omp parallel for
+					#pragma omp task
 					for (char e : base64Chars)
 					{
-						// std::cout << a << b << c << d << e << std::endl;
+						std::cout << a << b << c << d << e << std::endl;
 						procesVerification(a, b, c, d, e, verifier);
 						//threads.emplace_back(procesVerification, a, b, c, verifier);
 					}
+
+	#pragma omp taskwait
 
 	return 0;
 }
